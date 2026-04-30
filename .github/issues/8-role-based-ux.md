@@ -1,4 +1,4 @@
-### Feature: Role-Based UI and Permissions
+### Feature: Role-Based UX and Permissions
 
 **Description:**
 Implement role-based access control, providing different features and permissions for students, teachers, and administrators.
