@@ -5,6 +5,7 @@ A super simple FastAPI application that allows students to view and sign up
 for extracurricular activities at Mergington High School.
 """
 
+from datetime import datetime, timedelta
 from fastapi import FastAPI, HTTPException
 from fastapi.staticfiles import StaticFiles
 from fastapi.responses import RedirectResponse
@@ -20,58 +21,69 @@ app.mount("/static", StaticFiles(directory=os.path.join(Path(__file__).parent,
           "static")), name="static")
 
 # In-memory activity database
+
+# Example next session datetimes (replace with real scheduling logic in production)
 activities = {
     "Chess Club": {
         "description": "Learn strategies and compete in chess tournaments",
         "schedule": "Fridays, 3:30 PM - 5:00 PM",
+        "next_session_datetime": datetime(2026, 5, 1, 15, 30),
         "max_participants": 12,
         "participants": ["michael@mergington.edu", "daniel@mergington.edu"]
     },
     "Programming Class": {
         "description": "Learn programming fundamentals and build software projects",
         "schedule": "Tuesdays and Thursdays, 3:30 PM - 4:30 PM",
+        "next_session_datetime": datetime(2026, 5, 5, 15, 30),
         "max_participants": 20,
         "participants": ["emma@mergington.edu", "sophia@mergington.edu"]
     },
     "Gym Class": {
         "description": "Physical education and sports activities",
         "schedule": "Mondays, Wednesdays, Fridays, 2:00 PM - 3:00 PM",
+        "next_session_datetime": datetime(2026, 5, 4, 14, 0),
         "max_participants": 30,
         "participants": ["john@mergington.edu", "olivia@mergington.edu"]
     },
     "Soccer Team": {
         "description": "Join the school soccer team and compete in matches",
         "schedule": "Tuesdays and Thursdays, 4:00 PM - 5:30 PM",
+        "next_session_datetime": datetime(2026, 5, 7, 16, 0),
         "max_participants": 22,
         "participants": ["liam@mergington.edu", "noah@mergington.edu"]
     },
     "Basketball Team": {
         "description": "Practice and play basketball with the school team",
         "schedule": "Wednesdays and Fridays, 3:30 PM - 5:00 PM",
+        "next_session_datetime": datetime(2026, 5, 8, 15, 30),
         "max_participants": 15,
         "participants": ["ava@mergington.edu", "mia@mergington.edu"]
     },
     "Art Club": {
         "description": "Explore your creativity through painting and drawing",
         "schedule": "Thursdays, 3:30 PM - 5:00 PM",
+        "next_session_datetime": datetime(2026, 5, 2, 15, 30),
         "max_participants": 15,
         "participants": ["amelia@mergington.edu", "harper@mergington.edu"]
     },
     "Drama Club": {
         "description": "Act, direct, and produce plays and performances",
         "schedule": "Mondays and Wednesdays, 4:00 PM - 5:30 PM",
+        "next_session_datetime": datetime(2026, 5, 6, 16, 0),
         "max_participants": 20,
         "participants": ["ella@mergington.edu", "scarlett@mergington.edu"]
     },
     "Math Club": {
         "description": "Solve challenging problems and participate in math competitions",
         "schedule": "Tuesdays, 3:30 PM - 4:30 PM",
+        "next_session_datetime": datetime(2026, 5, 5, 15, 30),
         "max_participants": 10,
         "participants": ["james@mergington.edu", "benjamin@mergington.edu"]
     },
     "Debate Team": {
         "description": "Develop public speaking and argumentation skills",
         "schedule": "Fridays, 4:00 PM - 5:30 PM",
+        "next_session_datetime": datetime(2026, 5, 8, 16, 0),
         "max_participants": 12,
         "participants": ["charlotte@mergington.edu", "henry@mergington.edu"]
     }
@@ -112,12 +124,11 @@ def signup_for_activity(activity_name: str, email: str):
 
 @app.delete("/activities/{activity_name}/unregister")
 def unregister_from_activity(activity_name: str, email: str):
-    """Unregister a student from an activity"""
+    """Unregister a student from an activity, with 24-hour restriction"""
     # Validate activity exists
     if activity_name not in activities:
         raise HTTPException(status_code=404, detail="Activity not found")
 
-    # Get the specific activity
     activity = activities[activity_name]
 
     # Validate student is signed up
@@ -125,6 +136,15 @@ def unregister_from_activity(activity_name: str, email: str):
         raise HTTPException(
             status_code=400,
             detail="Student is not signed up for this activity"
+        )
+
+    # Enforce 24-hour restriction
+    now = datetime.now()
+    session_time = activity.get("next_session_datetime")
+    if session_time and (session_time - now) < timedelta(hours=24):
+        raise HTTPException(
+            status_code=403,
+            detail="Cannot unregister within 24 hours of the next session. Contact an admin for help."
         )
 
     # Remove student
