@@ -11,3 +11,6 @@ Implement restrictions to prevent last-minute changes to scheduled sessions (e.g
 **Benefits:**
 - Prevents confusion and last-minute disruptions.
 - Aligns with best practices from EA-Manager.
+
+/progress 
+/next
