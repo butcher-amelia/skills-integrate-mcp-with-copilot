@@ -11,4 +11,4 @@ Add an approval system for activities and participants. Staff or admins should b
 **Benefits:**
 - Adds accountability and oversight.
 - Prevents unauthorized or inappropriate activities.
-- Inspired by EA-Manager's approval system.
+- Inspired by TheMoon2000/EA-Manager's approval system.
